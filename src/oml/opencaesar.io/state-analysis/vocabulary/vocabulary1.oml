@@ -1,21 +1,243 @@
 @dc:title "Example Vocabulary"
 @dc:creator "Example Company"
 @dc:rights "Copyright 2019, by Example Company"
-vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as vocabulary1 {
+vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as state-analysis {
 	
 	extends <http://purl.org/dc/elements/1.1/> as dc
 	
-	// Example aspect
-	aspect A
+	extends <http://imce.jpl.nasa.gov/foundation/base#> as base
+	extends <http://imce.jpl.nasa.gov/foundation/analysis#> as analysis
 
-	// Example concept
-	concept C < A
-
-	// Example relation entity
-	relation entity R [
-		from C
-		to A
-		forward r
+	aspect Consumed
+	
+	aspect Consumer
+	
+	aspect ControllerInput < analysis:AnalyzedElement
+	
+	aspect EstimatorInput < analysis:AnalyzedElement
+	
+	aspect Provided
+	
+	aspect Provider
+	
+	concept Affected
+	
+	concept Affector < analysis:AnalyzedElement
+	
+	concept ControlSystem < base:IdentifiedElement, Consumer, Provider
+	
+	concept SystemUnderControl < base:IdentifiedElement, Consumer, Provider
+	
+	concept Measurement < base:IdentifiedElement, analysis:CharacterizedElement, Consumed, Provided, Affected, EstimatorInput
+	
+	concept Command < base:IdentifiedElement, analysis:AnalyzedElement, analysis:CharacterizedElement, Consumed, Provided, Affector, EstimatorInput [
+		restricts affects to max 1 State
 	]
+	
+	concept State < base:IdentifiedElement, analysis:AnalyzedElement, analysis:CharacterizedElement, Affected, Affector
+	
+	concept Model < analysis:Explanation, ControllerInput
+	
+	concept StateEffectsModel < Model [
+		restricts all analysis:analyzes to State
+		restricts all analysis:explains to State
+		restricts analysis:explains to max 1 State
+	]
+	
+	concept MeasurementModel < Model, EstimatorInput [
+		restricts all analysis:analyzes to State
+		restricts all analysis:explains to Measurement
+		restricts analysis:explains to max 1 Measurement	
+	]
+	
+	concept CommandModel < Model, EstimatorInput [
+		restricts all analysis:analyzes to Affector
+		restricts all analysis:explains to State
+		restricts analysis:explains to max 1 State		
+	]
+	
+	concept Estimate < base:IdentifiedElement, analysis:CharacterizedElement, EstimatorInput, ControllerInput
 
+	concept Goal < base:IdentifiedElement
+	
+	concept KnowledgeGoal < EstimatorInput, Goal
+	
+	concept Executor < analysis:Explanation
+	
+	concept Estimator < Executor [
+		restricts all analysis:analyzes to EstimatorInput
+		restricts all analysis:explains to Estimate
+	]
+	
+	concept ControlGoal < ControllerInput, Goal
+	
+	concept MaintenanceGoal < ControlGoal
+	
+	concept TransitionGoal < ControlGoal
+	
+	concept Controller < Executor [
+		restricts all analysis:analyzes to ControllerInput
+		restricts all analysis:explains to Command
+	]
+	
+	concept Constraint < base:IdentifiedElement
+	
+	concept TimePoint < base:IdentifiedElement
+	
+	concept TimeInterval < base:IdentifiedElement
+	
+	concept Elaboration < analysis:Explanation
+	
+	relation entity Affects [
+		from Affector
+		to Affected
+		forward affects
+		reverse isAffectedBy
+		asymmetric
+		irreflexive
+	]
+	
+	relation entity IsMeasurandOf [
+		from State
+		to Measurement
+		forward isMeasurandOf
+		reverse hasMeasurand
+		functional
+		inverse functional
+		asymmetric
+		irreflexive
+	] < Affects
+	
+	relation entity Commands [
+		from Command
+		to State
+		forward commands
+		reverse isCommandedBy
+		functional
+		inverse functional
+		asymmetric
+		irreflexive
+	] < Affects
+	
+	relation entity IsEstimateOf [
+		from Estimate
+		to State
+		forward isEstimateOf
+		reverse hasEstimate
+		functional
+		inverse functional
+		asymmetric
+		irreflexive
+	]
+	
+	relation entity AnalyzesMeasurementForEstimation [
+		from Estimator
+		to Measurement
+		forward analyzesMeasurementForEstimation
+	] < analysis:Analyzes
+
+	relation entity AnalyzesCommandForEstimation [
+		from Estimator
+		to Command
+		forward analylzesCommandForEstimation
+	] < analysis:Analyzes
+	
+	relation entity AnalyzesEstimateForEstimation [
+		from Estimator
+		to Estimate
+		forward analyzesEstimateForEstimation
+	] < analysis:Analyzes
+	
+	relation entity AnalyzesMeasurementModelForEstimation [
+		from Estimator
+		to MeasurementModel
+		forward analyzesMeasurementModelForEstimation
+	] < analysis:Analyzes
+
+	relation entity AnalyzesCommandModelForEstimation [
+		from Estimator
+		to CommandModel
+		forward analyzesCommandModelForEstimation
+	] < analysis:Analyzes
+	
+	relation entity AnalyzesKnowledgeGoalForEstimation [
+		from Estimator
+		to KnowledgeGoal
+		forward analyzesKnowledgeGoalForEstimation
+	] < analysis:Analyzes
+
+	relation entity AnalyzesEstimateForControl [
+		from Controller
+		to Estimate
+		forward analyzesEstimateForControl
+	]
+	
+	relation entity AnalyzesMeasurementModelForControl [
+		from Controller
+		to MeasurementModel
+		forward analyzesMeasurementModelForControl
+	] < analysis:Analyzes
+
+	relation entity AnalyzesCommandModelForControl [
+		from Controller
+		to CommandModel
+		forward analyzesCommandModelForControl
+	] < analysis:Analyzes
+
+	relation entity AnalyzesStateEffectsModelForControl [
+		from Controller
+		to StateEffectsModel
+		forward analyzesStateEffectsModelForControl
+	] < analysis:Analyzes
+
+	relation entity AnalyzesKnowledgeGoalForControl [
+		from Estimator
+		to KnowledgeGoal
+		forward analyzesKnowledgeGoalForControl
+	] < analysis:Analyzes
+
+	relation entity BeginsAt [
+		from TimeInterval
+		to TimePoint
+		forward beginsAt
+		functional
+	]
+	
+	relation entity EndsAt [
+		from TimeInterval
+		to TimePoint
+		forward endsAt
+		functional
+	]
+	
+	relation entity AssertsConstraint [
+		from Goal
+		to Constraint
+		forward assertsConstraint
+	]
+	
+	relation entity AppliesDuring [
+		from Goal
+		to TimeInterval
+		forward appliesDuring
+	]
+	
+	relation entity Constrains [
+		from Constraint
+		to State
+		forward constrains
+		functional
+	]
+	
+	relation entity ElaboratesFrom [
+		from Goal
+		to Goal
+		forward elaboratesFrom
+	]
+	
+	relation entity ElaboratesTo [
+		from Goal
+		to Goal
+		forward elaboratesTo
+	]
 }

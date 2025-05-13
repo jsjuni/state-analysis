@@ -5,11 +5,11 @@ project:
    version: 1.0.0
 
 dependencies:
-   - io.opencaesar.ontologies:core-vocabularies:5.+
+   - io.opencaesar.ontologies:imce-vocabularies:5.+
 
 datasets:
    state-analysis:
-      iri: http://opencaesar.io/state-analysis/description/bundle # root ontology
+      iri: http://opencaesar.io/state-analysis/vocabulary/bundle # root ontology
       url: http://localhost:3030/state-analysis # matches name in .oml/fuseki.ttl
       sources: [ 'src/oml' ]
       queries: src/sparql
