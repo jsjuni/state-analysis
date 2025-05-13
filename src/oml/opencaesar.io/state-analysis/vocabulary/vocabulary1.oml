@@ -14,8 +14,6 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	
 	// Slide 15
 	
-	//
-	
 	aspect Consumed
 	
 	aspect Consumer
