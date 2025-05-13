@@ -8,85 +8,60 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	extends <http://imce.jpl.nasa.gov/foundation/base#> as base
 	extends <http://imce.jpl.nasa.gov/foundation/analysis#> as analysis
 
+	//
+	// S E S S I O N  1
+	//
+	
+	// Slide 15
+	
+	//
+	
 	aspect Consumed
 	
 	aspect Consumer
-	
-	aspect ControllerInput < analysis:AnalyzedElement
-	
-	aspect EstimatorInput < analysis:AnalyzedElement
 	
 	aspect Provided
 	
 	aspect Provider
 	
+	concept ControlSystem < base:IdentifiedElement, Consumer, Provider [
+		restricts all consumes to Measurement
+		restricts all provides to Command
+	]
+	
+	concept SystemUnderControl < base:IdentifiedElement, Consumer, Provider [
+		restricts all consumes to Command
+		restricts all provides to Measurement
+	]
+	
+	relation entity Consumes [
+		from Consumer
+		to Consumed
+		forward consumes
+	]
+	
+	relation entity Provides [
+		from Provider
+		to Provided
+		forward provides
+		inverse functional
+	]
+	
+	//
+	// S E S S I O N  2
+	//
+	
+	// Slide 13
+	
+	concept StateVariable < base:IdentifiedElement
+	
+	// Slide 14
+	
+	ref concept StateVariable < Affected, Affector
+	
 	concept Affected
 	
 	concept Affector < analysis:AnalyzedElement
-	
-	concept ControlSystem < base:IdentifiedElement, Consumer, Provider
-	
-	concept SystemUnderControl < base:IdentifiedElement, Consumer, Provider
-	
-	concept Measurement < base:IdentifiedElement, analysis:CharacterizedElement, Consumed, Provided, Affected, EstimatorInput
-	
-	concept Command < base:IdentifiedElement, analysis:AnalyzedElement, analysis:CharacterizedElement, Consumed, Provided, Affector, EstimatorInput [
-		restricts affects to max 1 State
-	]
-	
-	concept State < base:IdentifiedElement, analysis:AnalyzedElement, analysis:CharacterizedElement, Affected, Affector
-	
-	concept Model < analysis:Explanation, ControllerInput
-	
-	concept StateEffectsModel < Model [
-		restricts all analysis:analyzes to State
-		restricts all analysis:explains to State
-		restricts analysis:explains to max 1 State
-	]
-	
-	concept MeasurementModel < Model, EstimatorInput [
-		restricts all analysis:analyzes to State
-		restricts all analysis:explains to Measurement
-		restricts analysis:explains to max 1 Measurement	
-	]
-	
-	concept CommandModel < Model, EstimatorInput [
-		restricts all analysis:analyzes to Affector
-		restricts all analysis:explains to State
-		restricts analysis:explains to max 1 State		
-	]
-	
-	concept Estimate < base:IdentifiedElement, analysis:CharacterizedElement, EstimatorInput, ControllerInput
-
-	concept Goal < base:IdentifiedElement
-	
-	concept KnowledgeGoal < EstimatorInput, Goal
-	
-	concept Executor < analysis:Explanation
-	
-	concept Estimator < Executor [
-		restricts all analysis:analyzes to EstimatorInput
-		restricts all analysis:explains to Estimate
-	]
-	
-	concept ControlGoal < ControllerInput, Goal
-	
-	concept MaintenanceGoal < ControlGoal
-	
-	concept TransitionGoal < ControlGoal
-	
-	concept Controller < Executor [
-		restricts all analysis:analyzes to ControllerInput
-		restricts all analysis:explains to Command
-	]
-	
-	concept Constraint < base:IdentifiedElement
-	
-	concept TimePoint < base:IdentifiedElement
-	
-	concept TimeInterval < base:IdentifiedElement
-	
-	concept Elaboration < analysis:Explanation
 	
 	relation entity Affects [
 		from Affector
@@ -97,8 +72,12 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		irreflexive
 	]
 	
+	// Slide 16
+	
+	concept Measurement < base:IdentifiedElement, Affected
+	
 	relation entity IsMeasurandOf [
-		from State
+		from StateVariable
 		to Measurement
 		forward isMeasurandOf
 		reverse hasMeasurand
@@ -108,9 +87,15 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		irreflexive
 	] < Affects
 	
+	// Slide 18
+
+	concept Command < base:IdentifiedElement, Affector [
+		restricts affects to max 1 StateVariable
+	]
+	
 	relation entity Commands [
 		from Command
-		to State
+		to StateVariable
 		forward commands
 		reverse isCommandedBy
 		functional
@@ -119,9 +104,58 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		irreflexive
 	] < Affects
 	
+	// Slide 26
+	
+	ref concept StateVariable < analysis:CharacterizedElement
+	
+	concept Model < analysis:Explanation
+	
+	concept StateEffectsModel < Model [
+		restricts all analysis:analyzes to StateVariable
+		restricts all analysis:explains to StateVariable
+		restricts analysis:explains to max 1 StateVariable
+	]
+	
+	// Slide 27
+	
+	ref concept Measurement < analysis:CharacterizedElement, Consumed, Provided
+	
+	concept MeasurementModel < Model, EstimatorInput [
+		restricts all analysis:analyzes to StateVariable
+		restricts all analysis:explains to Measurement
+		restricts analysis:explains to max 1 Measurement	
+	]
+	
+	// Slide 32
+	
+	concept CommandModel < Model, EstimatorInput [
+		restricts all analysis:analyzes to Affector
+		restricts all analysis:explains to StateVariable
+		restricts analysis:explains to max 1 StateVariable		
+	]
+	
+	// Slide 56
+	
+	aspect EstimatorInput < analysis:AnalyzedElement
+	
+	ref concept Measurement < EstimatorInput
+	ref concept Command < EstimatorInput
+	ref concept Estimate < EstimatorInput
+	
+	concept Executor < analysis:Explanation
+	
+	concept Estimate < base:IdentifiedElement, analysis:CharacterizedElement, EstimatorInput, Executor
+
+	concept Estimator < Executor [
+		restricts all analysis:analyzes to EstimatorInput
+		restricts all analysis:explains to Estimate
+	]
+	
+	concept KnowledgeGoal < EstimatorInput, Goal
+	
 	relation entity IsEstimateOf [
 		from Estimate
-		to State
+		to StateVariable
 		forward isEstimateOf
 		reverse hasEstimate
 		functional
@@ -166,6 +200,19 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		forward analyzesKnowledgeGoalForEstimation
 	] < analysis:Analyzes
 
+	// Slide 65
+	
+	ref concept Command < analysis:CharacterizedElement, Consumed, Provided
+	
+	aspect ControllerInput < analysis:AnalyzedElement
+	
+	concept Controller < Executor [
+		restricts all analysis:analyzes to ControllerInput
+		restricts all analysis:explains to Command
+	]
+	
+	concept ControlGoal < ControllerInput, Goal
+	
 	relation entity AnalyzesEstimateForControl [
 		from Controller
 		to Estimate
@@ -196,6 +243,16 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		forward analyzesKnowledgeGoalForControl
 	] < analysis:Analyzes
 
+	// Slide 81
+	
+	concept Goal < base:IdentifiedElement
+	
+	concept TimePoint < base:IdentifiedElement
+	
+	concept TimeInterval < base:IdentifiedElement
+	
+	concept Constraint < base:IdentifiedElement
+	
 	relation entity BeginsAt [
 		from TimeInterval
 		to TimePoint
@@ -223,11 +280,28 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	]
 	
 	relation entity Constrains [
-		from Constraint
-		to State
+		from Goal
+		to StateVariable
 		forward constrains
 		functional
 	]
+	
+	// Slide 92
+	
+	concept MaintenanceGoal < ControlGoal
+	
+	// Slide 93
+	
+	concept TransitionGoal < ControlGoal
+	
+	
+	//
+	// S E S S I O N  3 A
+	//
+	
+	// Slide 10
+	
+	concept Elaboration < analysis:Explanation
 	
 	relation entity ElaboratesFrom [
 		from Goal
@@ -240,4 +314,5 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		to Goal
 		forward elaboratesTo
 	]
+
 }
