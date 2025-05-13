@@ -3,6 +3,7 @@
 @dc:rights "Copyright 2019, by Example Company"
 vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as state-analysis {
 	
+	extends <http://www.w3.org/2000/01/rdf-schema#> as rdfs
 	extends <http://purl.org/dc/elements/1.1/> as dc
 	
 	extends <http://imce.jpl.nasa.gov/foundation/base#> as base
@@ -13,31 +14,53 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	//
 	
 	// Slide 15
-	
+		
+	@rdfs:label "Consumed"
+	@dc:description "Consumed is the class of all things consumed."
 	aspect Consumed
 	
+	@rdfs:label "Consumer"
+	@dc:description "Consumer is the class of all consumers."
 	aspect Consumer
 	
+	@rdfs:label "Provided"
+	@dc:description "Provided is the class of all things provided."
 	aspect Provided
 	
+	@rdfs:label "Provider"
+	@dc:description "Provider is the class of all providers."
 	aspect Provider
 	
+	@rdfs:label "Command"
+	concept Command < base:IdentifiedElement, Consumed, Provided
+	
+	@rdfs:label "Measurement"
+	concept Measurement < base:IdentifiedElement, Consumed, Provided
+	
+	@rdfs:label "Control System"
+	@dc:description "The functionality of control is separate from the rest of the system."
 	concept ControlSystem < base:IdentifiedElement, Consumer, Provider [
 		restricts all consumes to Measurement
 		restricts all provides to Command
 	]
 	
+	@rdfs:label "System Under Control"
+	@dc:description "The vehicle and its environment are considered together as an integrated entity."
 	concept SystemUnderControl < base:IdentifiedElement, Consumer, Provider [
 		restricts all consumes to Command
 		restricts all provides to Measurement
 	]
 	
+	@rdfs:label "Consumes"
+	@dc:description "Consumes is the relation from a Consumer to a Consumed."
 	relation entity Consumes [
 		from Consumer
 		to Consumed
 		forward consumes
 	]
 	
+	@rdfs:label "Provides"
+	@dc:description "Provides is the relation from a Provider to the Provided."
 	relation entity Provides [
 		from Provider
 		to Provided
@@ -51,16 +74,24 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	
 	// Slide 13
 	
+	@rdfs:label "State Variable"
+	@dc:description "A state is a property of a thing."
 	concept StateVariable < base:IdentifiedElement
 	
 	// Slide 14
 	
-	ref concept StateVariable < Affected, Affector
-	
+	@rdfs:label "Affected"
+	@dc:description "Affected is the class of all things affected by state effects."
 	concept Affected
 	
+	@rdfs:label "Affector"
+	@dc:description "Affector is the class of all things that affect state variables."
 	concept Affector < analysis:AnalyzedElement
 	
+	ref concept StateVariable < Affected, Affector
+	
+	@rdfs:label "Affects"
+	@dc:description "Affects is the relation from an Affector to an Affected."
 	relation entity Affects [
 		from Affector
 		to Affected
@@ -72,7 +103,7 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	
 	// Slide 16
 	
-	concept Measurement < base:IdentifiedElement, Affected
+	ref concept Measurement < Affected
 	
 	relation entity IsMeasurandOf [
 		from StateVariable
@@ -87,7 +118,7 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	
 	// Slide 18
 
-	concept Command < base:IdentifiedElement, Affector [
+	ref concept Command < Affector [
 		restricts affects to max 1 StateVariable
 	]
 	
@@ -130,6 +161,12 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		restricts all analysis:analyzes to Affector
 		restricts all analysis:explains to StateVariable
 		restricts analysis:explains to max 1 StateVariable		
+	]
+	
+	// Slide 49
+	
+	concept StateFunction < analysis:Characterization [
+		restricts all analysis:characterizes to StateVariable
 	]
 	
 	// Slide 56
