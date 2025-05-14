@@ -10,10 +10,14 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	extends <http://imce.jpl.nasa.gov/foundation/analysis#> as analysis
 
 	//
+	//
 	// S E S S I O N  1
 	//
+	//
 	
+	//
 	// Slide 15
+	//
 		
 	@rdfs:label "Consumed"
 	@dc:description "Consumed is the class of all things consumed."
@@ -69,16 +73,22 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	]
 	
 	//
+	//
 	// S E S S I O N  2
 	//
+	//
 	
+	//
 	// Slide 13
+	//
 	
 	@rdfs:label "State Variable"
 	@dc:description "A state is a property of a thing."
 	concept StateVariable < base:IdentifiedElement
 	
+	//
 	// Slide 14
+	//
 	
 	@rdfs:label "Affected"
 	@dc:description "Affected is the class of all things affected by state effects."
@@ -95,81 +105,107 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 	relation entity Affects [
 		from Affector
 		to Affected
+		@rdfs:label "affects"
 		forward affects
+		@rdfs:label "is affected by"
 		reverse isAffectedBy
 		asymmetric
 		irreflexive
 	]
 	
+	//
 	// Slide 16
+	//
 	
+	@rdfs:label "Measurement"
+	@dc:description "A Measurement is an observation of the value of a state variable."
 	ref concept Measurement < Affected
 	
+	@rdfs:label "Is Measurand Of"
+	@dc:description "Is Measurand Of is the relation from a state variable to a measurement."
 	relation entity IsMeasurandOf [
 		from StateVariable
 		to Measurement
+		@rdfs:label "is measurand of"
 		forward isMeasurandOf
+		@rdfs:label "has measurand"
 		reverse hasMeasurand
-		functional
 		inverse functional
 		asymmetric
 		irreflexive
 	] < Affects
 	
+	//
 	// Slide 18
+	//
 
+	@rdfs:label "Command"
+	@dc:description "A Command is a directive that affects a state variable."
 	ref concept Command < Affector [
 		restricts affects to max 1 StateVariable
 	]
 	
-	relation entity Commands [
-		from Command
-		to StateVariable
-		forward commands
-		reverse isCommandedBy
-		functional
-		inverse functional
-		asymmetric
-		irreflexive
-	] < Affects
+	//
+	// Slide 25
+	//
 	
-	// Slide 26
-	
-	ref concept StateVariable < analysis:CharacterizedElement
-	
+	@rdfs:label "Model"
 	concept Model < analysis:Explanation
 	
-	concept StateEffectsModel < Model [
+	concept StateEffectsModel < Model
+	
+	concept MeasurementModel < Model
+	
+	concept CommandModel < Model
+		
+	//
+	// Slide 26
+	//
+	
+	// A state variable is explained by (and therefore characterized by)
+	// a state effects model.
+	
+	ref concept StateVariable < analysis:AnalyzedElement, analysis:CharacterizedElement
+	
+	ref concept StateEffectsModel [
 		restricts all analysis:analyzes to StateVariable
 		restricts all analysis:explains to StateVariable
 		restricts analysis:explains to max 1 StateVariable
 	]
 	
+	//
 	// Slide 27
+	//
 	
-	ref concept Measurement < analysis:CharacterizedElement, Consumed, Provided
+	ref concept Measurement < analysis:CharacterizedElement
 	
-	concept MeasurementModel < Model, EstimatorInput [
+	ref concept MeasurementModel [
 		restricts all analysis:analyzes to StateVariable
 		restricts all analysis:explains to Measurement
 		restricts analysis:explains to max 1 Measurement	
 	]
 	
+	//
 	// Slide 32
+	//
 	
-	concept CommandModel < Model, EstimatorInput [
+	ref concept CommandModel [
 		restricts all analysis:analyzes to Affector
 		restricts all analysis:explains to StateVariable
 		restricts analysis:explains to max 1 StateVariable		
 	]
 	
+	//
 	// Slide 49
+	//
 	
 	concept StateFunction < analysis:Characterization [
 		restricts all analysis:characterizes to StateVariable
 	]
 	
+	//
 	// Slide 56
+	//
 	
 	aspect EstimatorInput < analysis:AnalyzedElement
 	
@@ -235,7 +271,9 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		forward analyzesKnowledgeGoalForEstimation
 	] < analysis:Analyzes
 
+	//
 	// Slide 65
+	//
 	
 	ref concept Command < analysis:CharacterizedElement, Consumed, Provided
 	
@@ -266,11 +304,11 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		forward analyzesCommandModelForControl
 	] < analysis:Analyzes
 
-	relation entity AnalyzesStateEffectsModelForControl [
-		from Controller
-		to StateEffectsModel
-		forward analyzesStateEffectsModelForControl
-	] < analysis:Analyzes
+//	relation entity AnalyzesStateEffectsModelForControl [
+//		from Controller
+//		to StateEffectsModel
+//		forward analyzesStateEffectsModelForControl
+//	] < analysis:Analyzes
 
 	relation entity AnalyzesKnowledgeGoalForControl [
 		from Estimator
@@ -278,7 +316,9 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		forward analyzesKnowledgeGoalForControl
 	] < analysis:Analyzes
 
+	//
 	// Slide 81
+	//
 	
 	concept Goal < base:IdentifiedElement
 	
@@ -321,20 +361,28 @@ vocabulary <http://opencaesar.io/state-analysis/vocabulary/vocabulary1#> as stat
 		functional
 	]
 	
+	//
 	// Slide 92
+	//
 	
 	concept MaintenanceGoal < ControlGoal
 	
+	//
 	// Slide 93
+	//
 	
 	concept TransitionGoal < ControlGoal
 	
 	
 	//
+	//
 	// S E S S I O N  3 A
 	//
+	//
 	
+	//
 	// Slide 10
+	//
 	
 	concept Elaboration < analysis:Explanation
 	
